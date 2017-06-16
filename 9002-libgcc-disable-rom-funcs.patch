@@ -1,7 +1,6 @@
-diff -ru a/libgcc/config/xtensa/t-xtensa b/libgcc/config/xtensa/t-xtensa
---- a/libgcc/config/xtensa/t-xtensa	2015-08-25 10:24:19.439057512 +0800
-+++ b/libgcc/config/xtensa/t-xtensa	2015-08-25 10:26:34.462308416 +0800
-@@ -1,13 +1,12 @@
+--- a/libgcc/config/xtensa/t-xtensa	2017-06-16 12:24:49.782615807 +0100
++++ a/libgcc/config/xtensa/t-xtensa	2017-06-16 12:24:54.402833400 +0100
+@@ -1,15 +1,14 @@
  LIB1ASMSRC = xtensa/lib1funcs.S
 -LIB1ASMFUNCS = _mulsi3 _divsi3 _modsi3 _udivsi3 _umodsi3 \
 -	_umulsidi3 _clz _clzsi2 _ctzsi2 _ffssi2 \
@@ -12,14 +11,15 @@ diff -ru a/libgcc/config/xtensa/t-xtensa b/libgcc/config/xtensa/t-xtensa
 -	_fixunssfsi _fixunssfdi _floatsisf _floatunsisf \
 +	_negsf2 _mulsf3 _divsf3 _cmpsf2 _fixsfsi _fixsfdi \
 +	_fixunssfdi \
+ 	_sqrtf _recipsf2 _rsqrtsf2 \
  	_floatdisf _floatundisf \
 -	_negdf2 _addsubdf3 _muldf3 _divdf3 _cmpdf2 _fixdfsi _fixdfdi \
 -	_fixunsdfsi _fixunsdfdi _floatsidf _floatunsidf \
--	_floatdidf _floatundidf \
--	_truncdfsf2 _extendsfdf2
 +	_negdf2 _cmpdf2 _fixdfdi \
 +	_fixunsdfdi \
-+	_floatdidf _floatundidf
+ 	_floatdidf _floatundidf \
+-	_truncdfsf2 _extendsfdf2 \
+ 	_sqrt _recipdf2 _rsqrtdf2
  
  LIB2ADD = $(srcdir)/config/xtensa/lib2funcs.S
 diff -ru a/libgcc/Makefile.in b/libgcc/Makefile.in

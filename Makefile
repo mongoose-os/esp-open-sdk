@@ -1,12 +1,14 @@
 TOP = $(PWD)
 TOOLCHAIN = $(TOP)/xtensa-lx106-elf
-VENDOR_SDK = 2.0.0
+VENDOR_SDK = 2.1.0
 
 UNZIP = unzip -q -o
 
 VENDOR_SDK_ZIP = $(VENDOR_SDK_ZIP_$(VENDOR_SDK))
 VENDOR_SDK_DIR = $(VENDOR_SDK_DIR_$(VENDOR_SDK))
 
+VENDOR_SDK_ZIP_2.1.0 = ESP8266_NONOS_SDK-89ba08ee24c9638dc59d61cfd2ef2819f511bfb9.zip
+VENDOR_SDK_DIR_2.1.0 = ESP8266_NONOS_SDK-89ba08ee24c9638dc59d61cfd2ef2819f511bfb9
 VENDOR_SDK_ZIP_2.0.0 = ESP8266_NONOS_SDK_V2.0.0_16_08_10.zip
 VENDOR_SDK_ZIP_2.0.0dead1 = ESP8266_NONOS_SDK_V2.0.0_16_07_19.zip
 VENDOR_SDK_DIR_2.0.0 = ESP8266_NONOS_SDK
@@ -85,8 +87,13 @@ esptool: toolchain
 	done
 	@touch $@
 
+.sdk_patch_2.1.0:
+	echo -e "#undef ESP_SDK_VERSION\n#define ESP_SDK_VERSION 020100" >>$(VENDOR_SDK_DIR)/include/esp_sdk_ver.h
+	patch -N -d $(VENDOR_SDK_DIR_2.1.0) -p1 < c_types-c99_sdk_2.patch
+	@touch $@
+
 .sdk_patch_2.0.0:
-	echo -e "#undef ESP_SDK_VERSION\n#define ESP_SDK_VERSION 010502" >>$(VENDOR_SDK_DIR)/include/esp_sdk_ver.h
+	echo -e "#undef ESP_SDK_VERSION\n#define ESP_SDK_VERSION 020000" >>$(VENDOR_SDK_DIR)/include/esp_sdk_ver.h
 	patch -N -d $(VENDOR_SDK_DIR_2.0.0) -p1 < c_types-c99_sdk_2.patch
 	@touch $@
 
@@ -231,8 +238,10 @@ sdk: $(VENDOR_SDK_DIR)/.dir
 
 $(VENDOR_SDK_DIR)/.dir: $(VENDOR_SDK_ZIP)
 	$(UNZIP) $^
-	-mv License $(VENDOR_SDK_DIR)
 	touch $@
+
+ESP8266_NONOS_SDK-89ba08ee24c9638dc59d61cfd2ef2819f511bfb9.zip:
+	wget --content-disposition "https://github.com/espressif/ESP8266_NONOS_SDK/archive/89ba08ee24c9638dc59d61cfd2ef2819f511bfb9.zip"
 
 ESP8266_NONOS_SDK_V2.0.0_16_08_10.zip:
 	wget --content-disposition "http://bbs.espressif.com/download/file.php?id=1690"

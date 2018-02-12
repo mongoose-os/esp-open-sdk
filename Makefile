@@ -1,12 +1,14 @@
 TOP = $(PWD)
 TOOLCHAIN = $(TOP)/xtensa-lx106-elf
-VENDOR_SDK = 2.1.0
+VENDOR_SDK = 2.2.0
 
 UNZIP = unzip -q -o
 
 VENDOR_SDK_ZIP = $(VENDOR_SDK_ZIP_$(VENDOR_SDK))
 VENDOR_SDK_DIR = $(VENDOR_SDK_DIR_$(VENDOR_SDK))
 
+VENDOR_SDK_ZIP_2.2.0 = ESP8266_NONOS_SDK-2.2.0.zip
+VENDOR_SDK_DIR_2.2.0 = ESP8266_NONOS_SDK-2.2.0
 VENDOR_SDK_ZIP_2.1.0 = ESP8266_NONOS_SDK-d09b74d192593bb630993cf69dd36817b7da56c7.zip
 VENDOR_SDK_DIR_2.1.0 = ESP8266_NONOS_SDK-d09b74d192593bb630993cf69dd36817b7da56c7
 VENDOR_SDK_ZIP_2.0.0 = ESP8266_NONOS_SDK_V2.0.0_16_08_10.zip
@@ -85,6 +87,11 @@ esptool: toolchain
 			--rename-section .irom0.text=.text \
 			$$l; \
 	done
+	@touch $@
+
+.sdk_patch_2.2.0:
+	echo -e "#undef ESP_SDK_VERSION\n#define ESP_SDK_VERSION 020100" >>$(VENDOR_SDK_DIR)/include/esp_sdk_ver.h
+	patch -N -d $(VENDOR_SDK_DIR_2.2.0) -p1 < c_types-c99_sdk_2.patch
 	@touch $@
 
 .sdk_patch_2.1.0:
@@ -197,7 +204,7 @@ empty_user_rf_pre_init.o: empty_user_rf_pre_init.c $(TOOLCHAIN)/bin/xtensa-lx106
 	cp FRM_ERR_PATCH/*.a $(VENDOR_SDK_DIR)/lib/
 	@touch $@
 
-standalone: sdk .sdk_patch toolchain
+standalone: sdk .sdk_patch
 ifeq ($(STANDALONE),y)
 	@echo "Installing vendor SDK headers into toolchain sysroot"
 	@cp -Rf sdk/include/* $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/usr/include/
@@ -239,6 +246,9 @@ sdk: $(VENDOR_SDK_DIR)/.dir
 $(VENDOR_SDK_DIR)/.dir: $(VENDOR_SDK_ZIP)
 	$(UNZIP) $^
 	touch $@
+
+ESP8266_NONOS_SDK-%.zip:
+	wget --content-disposition "https://github.com/espressif/ESP8266_NONOS_SDK/archive/v$*.zip"
 
 ESP8266_NONOS_SDK-d09b74d192593bb630993cf69dd36817b7da56c7.zip:
 	wget --content-disposition "https://github.com/espressif/ESP8266_NONOS_SDK/archive/d09b74d192593bb630993cf69dd36817b7da56c7.zip"

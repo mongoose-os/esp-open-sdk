@@ -7,8 +7,8 @@ UNZIP = unzip -q -o
 VENDOR_SDK_ZIP = $(VENDOR_SDK_ZIP_$(VENDOR_SDK))
 VENDOR_SDK_DIR = $(VENDOR_SDK_DIR_$(VENDOR_SDK))
 
-VENDOR_SDK_ZIP_2.2.1 = ESP8266_NONOS_SDK-6f57c0511df394cf2a42bb690f7de6e5240e0b67.zip
-VENDOR_SDK_DIR_2.2.1 = ESP8266_NONOS_SDK-6f57c0511df394cf2a42bb690f7de6e5240e0b67
+VENDOR_SDK_ZIP_2.2.1 = ESP8266_NONOS_SDK-e0fbec7def2a5a3a178ee8d35947933f91c4f7d8.zip
+VENDOR_SDK_DIR_2.2.1 = ESP8266_NONOS_SDK-e0fbec7def2a5a3a178ee8d35947933f91c4f7d8
 VENDOR_SDK_ZIP_2.2.0 = ESP8266_NONOS_SDK-2.2.0.zip
 VENDOR_SDK_DIR_2.2.0 = ESP8266_NONOS_SDK-2.2.0
 VENDOR_SDK_ZIP_2.1.0 = ESP8266_NONOS_SDK-d09b74d192593bb630993cf69dd36817b7da56c7.zip
@@ -255,13 +255,8 @@ $(VENDOR_SDK_DIR)/.dir: $(VENDOR_SDK_ZIP)
 	touch $@
 
 ESP8266_NONOS_SDK-%.zip:
+	wget --content-disposition "https://github.com/espressif/ESP8266_NONOS_SDK/archive/$*.zip" || \
 	wget --content-disposition "https://github.com/espressif/ESP8266_NONOS_SDK/archive/v$*.zip"
-
-ESP8266_NONOS_SDK-6f57c0511df394cf2a42bb690f7de6e5240e0b67.zip:
-	wget --content-disposition "https://github.com/espressif/ESP8266_NONOS_SDK/archive/6f57c0511df394cf2a42bb690f7de6e5240e0b67.zip"
-
-ESP8266_NONOS_SDK-d09b74d192593bb630993cf69dd36817b7da56c7.zip:
-	wget --content-disposition "https://github.com/espressif/ESP8266_NONOS_SDK/archive/d09b74d192593bb630993cf69dd36817b7da56c7.zip"
 
 ESP8266_NONOS_SDK_V2.0.0_16_08_10.zip:
 	wget --content-disposition "http://bbs.espressif.com/download/file.php?id=1690"

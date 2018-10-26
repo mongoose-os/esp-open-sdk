@@ -4,8 +4,13 @@
 # which can be used with multiple SDK versions.
 STANDALONE = y
 
+# NOTE: 4.8.5 has failing patches and 5.2.0 fails at GCC compile
+# GCC_VERSION = 4.8.5
+# GCC_VERSION = 5.2.0
+
+# GCC_VERSION = 6.4.0
 GCC_VERSION = 7.3.0
-CT_GCC_VERSION = 7_3_0
+CT_GCC_VERSION = $(shell echo $(GCC_VERSION) | sed -e 's/\./_/g')
 
 # Directory to install toolchain to, by default inside current dir.
 TOOLCHAIN = $(TOP)/xtensa-lx106-elf

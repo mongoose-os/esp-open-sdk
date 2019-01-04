@@ -28,12 +28,13 @@ VENDOR_SDK = master
 ## master@4899e50 - 4671b17cc9fc6ed6787c2d310daf8accccf29c8d           #
 ## master@4899e50 - 0e2308ff41578f6ad9a73f805ac4a441747d2a8e           #
 ## master@cab958d - 779294b0a220a6bd72c73963d890c2f1d9116b5e           #
-## ------------------------- v2.2.0 release -------------------------- #
-## master@fcdedd6 - f2c63854331c8d46f7ffe944f6697ab204a54379 <-- curr. #
+## ------------------------- v2.2.x release -------------------------- #
+## master@fcdedd6 - f2c63854331c8d46f7ffe944f6697ab204a54379 <-- 2.2.0 #
+## master@fab6c58 - 3ea90190d3092131505c97ac0ddb41d5e8bedefc <-- 2.2.1 #
 ########################################################################
 
-REPO_TAG          :=v2.2.1
-VENDOR_FULL_SHA   :=3ea90190d3092131505c97ac0ddb41d5e8bedefc
+REPO_TAG          :=v3.0.0-1
+VENDOR_FULL_SHA   :=b897db16d7a7a207b82334c7da8a8a6cd888b222
 VENDOR_GIT_ZIP    :="ESP8266_NONOS_SDK-$(VENDOR_FULL_SHA).zip"
 VENDOR_ZIP_DL_URI :="https://github.com/someburner/ESP8266_NONOS_SDK/releases/download/$(REPO_TAG)/$(VENDOR_GIT_ZIP)"
 
@@ -233,7 +234,7 @@ postbuild:
 	@cp -f $(TOP)/esp-open-lwip/include/lwipopts.h $(TOOLCHAIN)/xtensa-lx106-elf/sys-include/
 	@cp -Rf $(TOOLCHAIN)/xtensa-lx106-elf/usr/include/lwip $(TOOLCHAIN)/xtensa-lx106-elf/sys-include/
 	@cp -Rf $(TOOLCHAIN)/xtensa-lx106-elf/usr/include/arch $(TOOLCHAIN)/xtensa-lx106-elf/sys-include/
-	@cp -Rf $(TOOLCHAIN)/xtensa-lx106-elf/usr/include/xtensa/* $(TOOLCHAIN)/xtensa-lx106-elf/sys-include/xtensa/
+#	@cp -Rf $(TOOLCHAIN)/xtensa-lx106-elf/usr/include/xtensa/* $(TOOLCHAIN)/xtensa-lx106-elf/sys-include/xtensa/
 	@echo "Installing vendor SDK libs into sysroot"
 	@cp -f $(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/libhal.a $(TOOLCHAIN)/xtensa-lx106-elf/lib/libhal.a
 
@@ -265,12 +266,11 @@ user_rf_cal_sector_set.o: user_rf_cal_sector_set.c $(TOOLCHAIN)/bin/xtensa-lx106
 
 .sdk_dir_$(VENDOR_SDK): $(VENDOR_SDK_ZIP)
 	-mv -f $(VENDOR_ZIP_DIR) $(VENDOR_SDK_DIR)
-	-mv License $(VENDOR_SDK_DIR)
 	@touch $@
 
 .sdk_patch_master: user_rf_cal_sector_set.o
 	echo -e "#undef ESP_SDK_VERSION\n#define ESP_SDK_VERSION 020100" >>$(VENDOR_SDK_DIR)/include/esp_sdk_ver.h
-	$(PATCH) -d $(VENDOR_SDK_DIR) -p1 < c_types-c99_sdk_2.patch
+	$(PATCH) -d $(VENDOR_SDK_DIR) -p1 < c_types-c99_sdk_3.patch
 	cd $(VENDOR_SDK_DIR)/lib; mkdir -p tmp; cd tmp; $(TOOLCHAIN)/bin/xtensa-lx106-elf-ar x ../libcrypto.a; cd ..; $(TOOLCHAIN)/bin/xtensa-lx106-elf-ar rs libwpa.a tmp/*.o
 	$(TOOLCHAIN)/bin/xtensa-lx106-elf-ar r $(VENDOR_SDK_DIR)/lib/libmain.a user_rf_cal_sector_set.o
 	@touch $@

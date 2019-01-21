@@ -9,7 +9,7 @@ STANDALONE = y
 # GCC_VERSION = 5.2.0
 
 # GCC_VERSION = 6.4.0
-GCC_VERSION = 7.3.0
+GCC_VERSION = 7.4.0
 # GCC_VERSION = 8.2.0
 CT_GCC_VERSION = $(shell echo $(GCC_VERSION) | sed -e 's/\./_/g')
 
@@ -234,7 +234,7 @@ postbuild:
 	@cp -f $(TOP)/esp-open-lwip/include/lwipopts.h $(TOOLCHAIN)/xtensa-lx106-elf/sys-include/
 	@cp -Rf $(TOOLCHAIN)/xtensa-lx106-elf/usr/include/lwip $(TOOLCHAIN)/xtensa-lx106-elf/sys-include/
 	@cp -Rf $(TOOLCHAIN)/xtensa-lx106-elf/usr/include/arch $(TOOLCHAIN)/xtensa-lx106-elf/sys-include/
-#	@cp -Rf $(TOOLCHAIN)/xtensa-lx106-elf/usr/include/xtensa/* $(TOOLCHAIN)/xtensa-lx106-elf/sys-include/xtensa/
+	@cp -f $(TOP)/lx106-hal/include/xtensa/corebits.h $(TOOLCHAIN)/xtensa-lx106-elf/sys-include/xtensa/
 	@echo "Installing vendor SDK libs into sysroot"
 	@cp -f $(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/libhal.a $(TOOLCHAIN)/xtensa-lx106-elf/lib/libhal.a
 

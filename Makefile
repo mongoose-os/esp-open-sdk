@@ -33,8 +33,8 @@ VENDOR_SDK = master
 ## master@fab6c58 - 3ea90190d3092131505c97ac0ddb41d5e8bedefc <-- 2.2.1 #
 ########################################################################
 
-REPO_TAG          :=v3.0.0-1
-VENDOR_FULL_SHA   :=b897db16d7a7a207b82334c7da8a8a6cd888b222
+REPO_TAG          :=v2.2.1-lwip2
+VENDOR_FULL_SHA   :=f8f27ceb1d1b64a40a74acd9ff18398e492f8558
 VENDOR_GIT_ZIP    :="ESP8266_NONOS_SDK-$(VENDOR_FULL_SHA).zip"
 VENDOR_ZIP_DL_URI :="https://github.com/someburner/ESP8266_NONOS_SDK/releases/download/$(REPO_TAG)/$(VENDOR_GIT_ZIP)"
 
@@ -171,56 +171,51 @@ $(TOOLCHAIN)/lib/gcc/xtensa-lx106-elf/$(GCC_VERSION)/libgcc.a.orig: $(TOOLCHAIN)
 	cp strip_libgcc_funcs.txt $(@D)
 	cd $(@D); cp -f libgcc.a libgcc.a.orig; $(TOOLCHAIN)/bin/xtensa-lx106-elf-ar -M < strip_libgcc_funcs.txt; rm strip_libgcc_funcs.txt
 
-$(TOOLCHAIN)/xtensa-lx106-elf/lib/libc.a.orig: $(TOOLCHAIN)/xtensa-lx106-elf/lib/libc.a
+$(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libc.a.orig: $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libc.a
 	cp strip_libc_funcs.txt $(TOOLCHAIN)/xtensa-lx106-elf/lib
 	cd $(TOOLCHAIN)/xtensa-lx106-elf/lib; cp -f libc.a libc.a.orig; $(TOOLCHAIN)/bin/xtensa-lx106-elf-ar -M < strip_libc_funcs.txt; rm strip_libc_funcs.txt
 
-$(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/libcirom.a: $(TOOLCHAIN)/xtensa-lx106-elf/lib/libc.a
+$(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libcirom.a: $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libc.a
 	@echo "Creating irom version of libc..."
 	$(TOOLCHAIN)/bin/xtensa-lx106-elf-objcopy --rename-section .text=.irom0.text --rename-section .literal=.irom0.literal $(<) $(@);
 
-$(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/libmirom.a: $(TOOLCHAIN)/xtensa-lx106-elf/lib/libm.a
+$(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libmirom.a: $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libm.a
 	@echo "Creating irom version of libm..."
 	$(TOOLCHAIN)/bin/xtensa-lx106-elf-objcopy --rename-section .text=.irom0.text --rename-section .literal=.irom0.literal $(<) $(@);
 
-$(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/libhal.a: $(TOOLCHAIN)/bin/xtensa-lx106-elf-gcc
+$(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libhal.a: $(TOOLCHAIN)/bin/xtensa-lx106-elf-gcc
 	make -C lx106-hal -f ../Makefile _libhal
 
 _libhal:
 	autoreconf -i
-	PATH="$(TOOLCHAIN)/bin:$(PATH)" ./configure --host=xtensa-lx106-elf --prefix=$(TOOLCHAIN)/xtensa-lx106-elf/usr
+	PATH="$(TOOLCHAIN)/bin:$(PATH)" ./configure --host=xtensa-lx106-elf --prefix=$(TOOLCHAIN)/xtensa-lx106-elf/sysroot/usr
 	PATH="$(TOOLCHAIN)/bin:$(PATH)" make
 	PATH="$(TOOLCHAIN)/bin:$(PATH)" make install
 
-liblwip: $(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/liblwip_open.a
+liblwip: $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/liblwip_open.a
 
-$(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/liblwip_open.a: $(TOOLCHAIN)/bin/xtensa-lx106-elf-gcc
+$(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/liblwip_open.a: $(TOOLCHAIN)/bin/xtensa-lx106-elf-gcc
 	make -C esp-open-lwip -f Makefile.open all \
 		CC=$(TOOLCHAIN)/bin/xtensa-lx106-elf-gcc \
 		AR=$(TOOLCHAIN)/bin/xtensa-lx106-elf-ar \
 		PREFIX=$(TOOLCHAIN) \
 		CFLAGS_EXTRA=-I$(TOP)/sdk/include
-	cp esp-open-lwip/liblwip_open.a $(TOOLCHAIN)/xtensa-lx106-elf/usr/lib
+	cp esp-open-lwip/liblwip_open.a $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib
 	cp -a esp-open-lwip/include/arch esp-open-lwip/include/lwip esp-open-lwip/include/netif esp-open-lwip/include/lwipopts.h \
-		$(TOOLCHAIN)/xtensa-lx106-elf/usr/include/
-	cp -a esp-open-lwip/include/arch esp-open-lwip/include/lwip esp-open-lwip/include/netif esp-open-lwip/include/lwipopts.h \
-		$(TOOLCHAIN)/xtensa-lx106-elf/sys-include/
+		$(TOOLCHAIN)/xtensa-lx106-elf/sysroot/usr/include/
 
-libs: $(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/libhal.a $(TOOLCHAIN)/xtensa-lx106-elf/lib/libc.a.orig $(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/libcirom.a $(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/libmirom.a $(TOOLCHAIN)/lib/gcc/xtensa-lx106-elf/$(GCC_VERSION)/libgcc.a.orig
+libs: $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libhal.a $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libc.a.orig $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libcirom.a $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libmirom.a $(TOOLCHAIN)/lib/gcc/xtensa-lx106-elf/$(GCC_VERSION)/libgcc.a.orig
 
 sdk: .sdk_dir_$(VENDOR_SDK) .sdk_patch_$(VENDOR_SDK)
 	ln -snf $(VENDOR_SDK_DIR) sdk
 ifeq ($(STANDALONE), y)
-	@echo "Installing vendor SDK headers into toolchain"
-	@mkdir -p $(TOOLCHAIN)/xtensa-lx106-elf/usr/include
-	@cp -Rf sdk/include/* $(TOOLCHAIN)/xtensa-lx106-elf/usr/include/
-	@echo "Installing vendor SDK libs into toolchain"
-	@cp -Rf $(VENDOR_SDK_DIR)/lib/* $(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/
-	@rm -f $(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/libgcc.a
-	@rm -f $(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/libc.a
-	@echo "Installing vendor SDK linker scripts into toolchain"
-	@sed -e 's/\r//' $(VENDOR_SDK_DIR)/ld/eagle.app.v6.ld | sed -e s@../ld/@@ >$(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/eagle.app.v6.ld
-	@sed -e 's/\r//' $(VENDOR_SDK_DIR)/ld/eagle.rom.addr.v6.ld >$(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/eagle.rom.addr.v6.ld
+	@echo "Installing vendor SDK headers into toolchain sysroot"
+	@cp -Rf sdk/include/* $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/usr/include/
+	@echo "Installing vendor SDK libs into toolchain sysroot"
+	@cp -Rf sdk/lib/* $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/usr/lib/
+	@echo "Installing vendor SDK linker scripts into toolchain sysroot"
+	@sed -e 's/\r//' sdk/ld/eagle.app.v6.ld | sed -e s@../ld/@@ >$(TOOLCHAIN)/xtensa-lx106-elf/sysroot/usr/lib/eagle.app.v6.ld
+	@sed -e 's/\r//' sdk/ld/eagle.rom.addr.v6.ld >$(TOOLCHAIN)/xtensa-lx106-elf/sysroot/usr/lib/eagle.rom.addr.v6.ld
 else
 	cp -Rf $(VENDOR_SDK_DIR) $(TOP)/$(VENDOR_SDK_DIR)
 	rm -f $(TOP)/$(VENDOR_SDK_DIR)/lib/libgcc.a
@@ -228,15 +223,17 @@ else
 	ln -snf $(TOP)/$(VENDOR_SDK_DIR) $(TOP)/sdk
 endif
 
+export PREFIX=$(TOOLCHAIN)
+
+lwip2-install:
+	$(MAKE) -C lwip2 -f Makefile.open install
+
+lwip2-clean:
+	$(MAKE) -C lwip2 -f Makefile.open clean
+
 postbuild:
-	@echo "Installing vendor SDK headers into sysroot"
-	@cp -f sdk/include/c_types.h $(TOOLCHAIN)/xtensa-lx106-elf/sys-include/
-	@cp -f $(TOP)/esp-open-lwip/include/lwipopts.h $(TOOLCHAIN)/xtensa-lx106-elf/sys-include/
-	@cp -Rf $(TOOLCHAIN)/xtensa-lx106-elf/usr/include/lwip $(TOOLCHAIN)/xtensa-lx106-elf/sys-include/
-	@cp -Rf $(TOOLCHAIN)/xtensa-lx106-elf/usr/include/arch $(TOOLCHAIN)/xtensa-lx106-elf/sys-include/
-	@cp -f $(TOP)/lx106-hal/include/xtensa/corebits.h $(TOOLCHAIN)/xtensa-lx106-elf/sys-include/xtensa/
-	@echo "Installing vendor SDK libs into sysroot"
-	@cp -f $(TOOLCHAIN)/xtensa-lx106-elf/usr/lib/libhal.a $(TOOLCHAIN)/xtensa-lx106-elf/lib/libhal.a
+	@echo "Installing xtensa includes into sysroot"
+	@cp -f $(TOP)/lx106-hal/include/xtensa/corebits.h $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/usr/include/xtensa/
 
 clean-sdk-build:
 	rm -f .sdk_dir_$(VENDOR_SDK) .sdk_patch_$(VENDOR_SDK)
@@ -270,7 +267,7 @@ user_rf_cal_sector_set.o: user_rf_cal_sector_set.c $(TOOLCHAIN)/bin/xtensa-lx106
 
 .sdk_patch_master: user_rf_cal_sector_set.o
 	echo -e "#undef ESP_SDK_VERSION\n#define ESP_SDK_VERSION 020100" >>$(VENDOR_SDK_DIR)/include/esp_sdk_ver.h
-	$(PATCH) -d $(VENDOR_SDK_DIR) -p1 < c_types-c99_sdk_3.patch
+	$(PATCH) -d $(VENDOR_SDK_DIR) -p1 < c_types-c99_sdk_2.patch
 	cd $(VENDOR_SDK_DIR)/lib; mkdir -p tmp; cd tmp; $(TOOLCHAIN)/bin/xtensa-lx106-elf-ar x ../libcrypto.a; cd ..; $(TOOLCHAIN)/bin/xtensa-lx106-elf-ar rs libwpa.a tmp/*.o
 	$(TOOLCHAIN)/bin/xtensa-lx106-elf-ar r $(VENDOR_SDK_DIR)/lib/libmain.a user_rf_cal_sector_set.o
 	@touch $@

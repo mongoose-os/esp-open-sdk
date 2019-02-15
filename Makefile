@@ -33,12 +33,12 @@ VENDOR_SDK = master
 ## master@fab6c58 - 3ea90190d3092131505c97ac0ddb41d5e8bedefc <-- 2.2.1 #
 ########################################################################
 
-REPO_TAG          :=v2.2.1-lwip2
-VENDOR_FULL_SHA   :=f8f27ceb1d1b64a40a74acd9ff18398e492f8558
+REPO_TAG          :=v2.2.2
+VENDOR_FULL_SHA   :=e4fbef1ac88adeb4a3ebf0dfc1d054c8a96b4868
 VENDOR_GIT_ZIP    :="ESP8266_NONOS_SDK-$(VENDOR_FULL_SHA).zip"
 VENDOR_ZIP_DL_URI :="https://github.com/someburner/ESP8266_NONOS_SDK/releases/download/$(REPO_TAG)/$(VENDOR_GIT_ZIP)"
 
-.PHONY: crosstool-ng esptool toolchain _libhal libs sdk liblwip postbuild
+.PHONY: crosstool-ng esptool toolchain _libhal libs sdk liblwip lwip2 postbuild
 
 TOP = $(PWD)
 SHELL = /bin/bash
@@ -103,7 +103,7 @@ VENDOR_SDK_DIR_0.9.3 = esp_iot_sdk_v0.9.3
 VENDOR_SDK_ZIP_0.9.2 = esp_iot_sdk_v0.9.2_14_10_24.zip
 VENDOR_SDK_DIR_0.9.2 = esp_iot_sdk_v0.9.2
 
-all: toolchain esptool sdk libs liblwip postbuild
+all: toolchain esptool sdk libs liblwip lwip2 postbuild
 	@echo
 	@echo "Xtensa toolchain is built, to use it:"
 	@echo
@@ -223,6 +223,9 @@ else
 	ln -snf $(TOP)/$(VENDOR_SDK_DIR) $(TOP)/sdk
 endif
 
+lwip2:
+	$(MAKE) -C lwip2 -f Makefile.open install PREFIX=$(TOOLCHAIN)
+
 export PREFIX=$(TOOLCHAIN)
 
 lwip2-install:
@@ -245,6 +248,7 @@ clean: clean-sdk-build
 	rm -f .sdk_patch_$(VENDOR_SDK)
 	rm -f user_rf_cal_sector_set.o empty_user_rf_pre_init.o
 	$(MAKE) -C esp-open-lwip -f Makefile.open clean
+	$(MAKE) -C lwip2 -f Makefile.open clean PREFIX=$(TOOLCHAIN)
 	rm -f .sdk_dir_$(VENDOR_SDK)
 
 distclean: clean

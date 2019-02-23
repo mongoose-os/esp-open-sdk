@@ -11,3 +11,6 @@
 [submodule "crosstool-ng"]
 	path = crosstool-ng
 	url = https://github.com/someburner/crosstool-ng.git
+[submodule "lwip2"]
+	path = lwip2
+	url = https://github.com/someburner/esp82xx-nonos-linklayer-opensdk.git

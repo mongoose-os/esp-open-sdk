@@ -9,8 +9,9 @@ STANDALONE = y
 # GCC_VERSION = 5.2.0
 
 # GCC_VERSION = 6.4.0
-GCC_VERSION = 7.4.0
+# GCC_VERSION = 7.4.0
 # GCC_VERSION = 8.2.0
+GCC_VERSION = 9.2.0
 CT_GCC_VERSION = $(shell echo $(GCC_VERSION) | sed -e 's/\./_/g')
 
 # Directory to install toolchain to, by default inside current dir.

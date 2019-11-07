@@ -14,6 +14,19 @@ STANDALONE = y
 GCC_VERSION = 9.2.0
 CT_GCC_VERSION = $(shell echo $(GCC_VERSION) | sed -e 's/\./_/g')
 
+# NOTE: comment out to disable building gdb (cuts down on build time)
+CT_EN_GDB ?= yes
+
+# NOTE: uncomment to configure newlib with --enable-newlib-reent-small
+# CT_LIBC_EN_REENT ?= yes
+
+# NOTE: uncomment to configure newlib with:
+# --enable-newlib-io-long-long
+# --enable-newlib-io-long-double
+# --enable-newlib-io-pos-args
+# --enable-newlib-io-c99-formats
+# CT_LIBC_EN_IO_EXTRA ?= yes
+
 # Directory to install toolchain to, by default inside current dir.
 TOOLCHAIN = $(TOP)/xtensa-lx106-elf
 
@@ -22,18 +35,8 @@ TOOLCHAIN = $(TOP)/xtensa-lx106-elf
 # always call it master, then d/l the SDK as a zip based on SHA.
 VENDOR_SDK = master
 
-########################### SDK Commit List ############################
-## Pre-Krack      - 10aea1782b2cac518a1a30eb8b4e046ed76c8d7c           #
-## Krack patch    - 61248df5f6d45d130313b412f7492f581fd4cadf           #
-## master@10d7772 - 10d777260264f658965c5f323ae7f6741074d50e           #
-## master@4899e50 - 4671b17cc9fc6ed6787c2d310daf8accccf29c8d           #
-## master@4899e50 - 0e2308ff41578f6ad9a73f805ac4a441747d2a8e           #
-## master@cab958d - 779294b0a220a6bd72c73963d890c2f1d9116b5e           #
-## ------------------------- v2.2.x release -------------------------- #
-## master@fcdedd6 - f2c63854331c8d46f7ffe944f6697ab204a54379 <-- 2.2.0 #
-## master@fab6c58 - 3ea90190d3092131505c97ac0ddb41d5e8bedefc <-- 2.2.1 #
-########################################################################
-
+# NOTE: See full list here:
+# https://github.com/someburner/ESP8266_NONOS_SDK/releases
 REPO_TAG          :=v2.2.2
 VENDOR_FULL_SHA   :=1848ef14625824db977077fef07f92e0992e1840
 VENDOR_GIT_ZIP    :="ESP8266_NONOS_SDK-$(VENDOR_FULL_SHA).zip"
@@ -136,6 +139,21 @@ $(TOOLCHAIN)/bin/xtensa-lx106-elf-gcc: crosstool-ng/ct-ng
 	$(MAKE) -C crosstool-ng -f ../Makefile _toolchain
 
 _toolchain:
+	# Set GDB, newlib options before loading ct-ng sample
+ifeq ($(CT_LIBC_EN_IO_EXTRA),yes)
+	echo "CT_LIBC_NEWLIB_IO_POS_ARGS=y" >> samples/xtensa-lx106-elf/crosstool.config
+	echo "CT_LIBC_NEWLIB_IO_C99FMT=y" >> samples/xtensa-lx106-elf/crosstool.config
+	echo "CT_LIBC_NEWLIB_IO_FLOAT=y" >> samples/xtensa-lx106-elf/crosstool.config
+	echo "CT_LIBC_NEWLIB_IO_LL=y" >> samples/xtensa-lx106-elf/crosstool.config
+	echo "CT_LIBC_NEWLIB_IO_LDBL=y" >> samples/xtensa-lx106-elf/crosstool.config
+endif
+ifeq ($(CT_LIBC_EN_REENT),yes)
+	echo "CT_LIBC_NEWLIB_REENT_SMALL=y" >> samples/xtensa-lx106-elf/crosstool.config
+endif
+ifeq ($(CT_EN_GDB),yes)
+	echo "CT_DEBUG_GDB=y" >> samples/xtensa-lx106-elf/crosstool.config
+endif
+	# load sample ct-ng
 	./ct-ng xtensa-lx106-elf
 	sed -r -i.org s%CT_PREFIX_DIR=.*%CT_PREFIX_DIR="$(TOOLCHAIN)"% .config
 	sed -r -i s%CT_PREFIX_DIR_RO=y%"#"CT_PREFIX_DIR_RO=y% .config
@@ -170,11 +188,11 @@ crosstool-ng/bootstrap:
 
 $(TOOLCHAIN)/lib/gcc/xtensa-lx106-elf/$(GCC_VERSION)/libgcc.a.orig: $(TOOLCHAIN)/lib/gcc/xtensa-lx106-elf/$(GCC_VERSION)/libgcc.a
 	cp strip_libgcc_funcs.txt $(@D)
-	cd $(@D); cp -f libgcc.a libgcc.a.orig; $(TOOLCHAIN)/bin/xtensa-lx106-elf-ar -M < strip_libgcc_funcs.txt; rm strip_libgcc_funcs.txt
+	cd $(@D); cp -f libgcc.a libgcc.a.orig; $(TOOLCHAIN)/bin/xtensa-lx106-elf-ar -M < strip_libgcc_funcs.txt; rm strip_libgcc_funcs.txt; cp -f libgcc.a $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/usr/lib/libgcc.a;
 
 $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libc.a.orig: $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libc.a
 	cp strip_libc_funcs.txt $(TOOLCHAIN)/xtensa-lx106-elf/lib
-	cd $(TOOLCHAIN)/xtensa-lx106-elf/lib; cp -f libc.a libc.a.orig; $(TOOLCHAIN)/bin/xtensa-lx106-elf-ar -M < strip_libc_funcs.txt; rm strip_libc_funcs.txt
+	cd $(TOOLCHAIN)/xtensa-lx106-elf/lib; cp -f libc.a libc.a.orig; $(TOOLCHAIN)/bin/xtensa-lx106-elf-ar -M < strip_libc_funcs.txt; rm strip_libc_funcs.txt; cp -f libc.a $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/usr/lib/libc.a;
 
 $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libcirom.a: $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libc.a
 	@echo "Creating irom version of libc..."
@@ -254,6 +272,7 @@ clean: clean-sdk-build
 
 distclean: clean
 	$(MAKE) -C crosstool-ng clean MAKELEVEL=0
+	(cd crosstool-ng; git checkout -- samples/xtensa-lx106-elf/crosstool.config; cd ..)
 	-rm -f crosstool-ng/.config.org
 	-rm -rf crosstool-ng/lib
 	-rm -rf crosstool-ng/share

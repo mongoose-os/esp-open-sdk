@@ -38,7 +38,7 @@ VENDOR_SDK = master
 # NOTE: See full list here:
 # https://github.com/someburner/ESP8266_NONOS_SDK/releases
 REPO_TAG          :=v2.2.2
-VENDOR_FULL_SHA   :=1848ef14625824db977077fef07f92e0992e1840
+VENDOR_FULL_SHA   :=a8d1fcbebda3055a89d7378c3fc3591df4420966
 VENDOR_GIT_ZIP    :="ESP8266_NONOS_SDK-$(VENDOR_FULL_SHA).zip"
 VENDOR_ZIP_DL_URI :="https://github.com/someburner/ESP8266_NONOS_SDK/releases/download/$(REPO_TAG)/$(VENDOR_GIT_ZIP)"
 

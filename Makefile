@@ -22,10 +22,8 @@ CT_EN_GDB ?= yes
 
 # NOTE: uncomment to configure newlib with:
 # --enable-newlib-io-long-long
-# --enable-newlib-io-long-double
-# --enable-newlib-io-pos-args
 # --enable-newlib-io-c99-formats
-# CT_LIBC_EN_IO_EXTRA ?= yes
+CT_LIBC_EN_IO_EXTRA ?= yes
 
 # Directory to install toolchain to, by default inside current dir.
 TOOLCHAIN = $(TOP)/xtensa-lx106-elf
@@ -38,7 +36,7 @@ VENDOR_SDK = master
 # NOTE: See full list here:
 # https://github.com/someburner/ESP8266_NONOS_SDK/releases
 REPO_TAG          :=v2.2.2
-VENDOR_FULL_SHA   :=e4fbef1ac88adeb4a3ebf0dfc1d054c8a96b4868
+VENDOR_FULL_SHA   :=1848ef14625824db977077fef07f92e0992e1840
 VENDOR_GIT_ZIP    :="ESP8266_NONOS_SDK-$(VENDOR_FULL_SHA).zip"
 VENDOR_ZIP_DL_URI :="https://github.com/someburner/ESP8266_NONOS_SDK/releases/download/$(REPO_TAG)/$(VENDOR_GIT_ZIP)"
 
@@ -56,7 +54,7 @@ VENDOR_SDK_ZIP_master = ESP8266_NONOS_SDK-master.zip
 VENDOR_ZIP_DIR_master = ESP8266_NONOS_SDK-master
 VENDOR_SDK_DIR_master = esp_nonos_sdk_master
 
-all: toolchain esptool sdk libs liblwip lwip2 postbuild
+all: toolchain esptool sdk libs postbuild
 	@echo
 	@echo "Xtensa toolchain is built, to use it:"
 	@echo
@@ -86,11 +84,11 @@ $(TOOLCHAIN)/bin/xtensa-lx106-elf-gcc: crosstool-ng/ct-ng
 _toolchain:
 	# Set GDB, newlib options before loading ct-ng sample
 ifeq ($(CT_LIBC_EN_IO_EXTRA),yes)
-	echo "CT_LIBC_NEWLIB_IO_POS_ARGS=y" >> samples/xtensa-lx106-elf/crosstool.config
+	# echo "CT_LIBC_NEWLIB_IO_POS_ARGS=y" >> samples/xtensa-lx106-elf/crosstool.config
 	echo "CT_LIBC_NEWLIB_IO_C99FMT=y" >> samples/xtensa-lx106-elf/crosstool.config
 	echo "CT_LIBC_NEWLIB_IO_FLOAT=y" >> samples/xtensa-lx106-elf/crosstool.config
 	echo "CT_LIBC_NEWLIB_IO_LL=y" >> samples/xtensa-lx106-elf/crosstool.config
-	echo "CT_LIBC_NEWLIB_IO_LDBL=y" >> samples/xtensa-lx106-elf/crosstool.config
+	# echo "CT_LIBC_NEWLIB_IO_LDBL=y" >> samples/xtensa-lx106-elf/crosstool.config
 endif
 ifeq ($(CT_LIBC_EN_REENT),yes)
 	echo "CT_LIBC_NEWLIB_REENT_SMALL=y" >> samples/xtensa-lx106-elf/crosstool.config
@@ -113,6 +111,9 @@ endif
 	echo "CT_GCC_VERSION=\"$(GCC_VERSION)\"" >> .config
 	# Append overrides
 	cat ../crosstool-config-overrides >> .config
+	# Patches
+	cp ../*-newlib-*.patch local-patches/newlib/2.0.0
+	cp ../*-libgcc-*.patch local-patches/gcc/$(GCC_VERSION)
 	# Build
 	./ct-ng build
 

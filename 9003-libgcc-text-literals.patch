@@ -1,0 +1,156 @@
+--- a/libgcc/config/xtensa/ieee754-sf.S	2019-01-01 12:31:55.000000000 +0000
++++ b/libgcc/config/xtensa/ieee754-sf.S	2020-06-28 03:01:06.904288091 +0100
+@@ -45,6 +45,7 @@
+ 	.align	4
+ 	.global	__negsf2
+ 	.type	__negsf2, @function
++	.literal_position
+ __negsf2:
+ 	leaf_entry sp, 16
+ 	movi	a4, 0x80000000
+@@ -1189,6 +1190,7 @@
+ 	.global	__nesf2
+ 	.set	__nesf2, __eqsf2
+ 	.type	__eqsf2, @function
++	.literal_position
+ __eqsf2:
+ 	leaf_entry sp, 16
+ 	bne	a2, a3, 4f
+@@ -1226,6 +1228,7 @@
+ 	.align	4
+ 	.global	__gtsf2
+ 	.type	__gtsf2, @function
++	.literal_position
+ __gtsf2:
+ 	leaf_entry sp, 16
+ 	movi	a6, 0x7f800000
+@@ -1250,6 +1253,7 @@
+ 	.align	4
+ 	.global	__lesf2
+ 	.type	__lesf2, @function
++	.literal_position
+ __lesf2:
+ 	leaf_entry sp, 16
+ 	movi	a6, 0x7f800000
+@@ -1304,6 +1308,7 @@
+ 	.align	4
+ 	.global	__gesf2
+ 	.type	__gesf2, @function
++	.literal_position
+ __gesf2:
+ 	leaf_entry sp, 16
+ 	movi	a6, 0x7f800000
+@@ -1328,6 +1333,7 @@
+ 	.align	4
+ 	.global	__ltsf2
+ 	.type	__ltsf2, @function
++	.literal_position
+ __ltsf2:
+ 	leaf_entry sp, 16
+ 	movi	a6, 0x7f800000
+@@ -1382,6 +1388,7 @@
+ 	.align	4
+ 	.global	__unordsf2
+ 	.type	__unordsf2, @function
++	.literal_position
+ __unordsf2:
+ 	leaf_entry sp, 16
+ 	movi	a6, 0x7f800000
+@@ -1407,6 +1414,7 @@
+ 	.align	4
+ 	.global	__fixsfsi
+ 	.type	__fixsfsi, @function
++	.literal_position
+ __fixsfsi:
+ 	leaf_entry sp, 16
+ 
+@@ -1459,6 +1467,7 @@
+ 	.align	4
+ 	.global	__fixsfdi
+ 	.type	__fixsfdi, @function
++	.literal_position
+ __fixsfdi:
+ 	leaf_entry sp, 16
+ 
+@@ -1593,6 +1602,7 @@
+ 	.align	4
+ 	.global	__fixunssfdi
+ 	.type	__fixunssfdi, @function
++	.literal_position
+ __fixunssfdi:
+ 	leaf_entry sp, 16
+ 
+--- a/libgcc/config/xtensa/ieee754-df.S	2019-01-01 12:31:55.000000000 +0000
++++ b/libgcc/config/xtensa/ieee754-df.S	2020-06-28 03:04:10.282444626 +0100
+@@ -45,6 +45,7 @@
+ 	.align	4
+ 	.global	__negdf2
+ 	.type	__negdf2, @function
++	.literal_position
+ __negdf2:
+ 	leaf_entry sp, 16
+ 	movi	a4, 0x80000000
+@@ -1625,6 +1626,7 @@
+ 	.global	__nedf2
+ 	.set	__nedf2, __eqdf2
+ 	.type	__eqdf2, @function
++	.literal_position
+ __eqdf2:
+ 	leaf_entry sp, 16
+ 	bne	xl, yl, 2f
+@@ -1665,6 +1667,7 @@
+ 	.align	4
+ 	.global	__gtdf2
+ 	.type	__gtdf2, @function
++	.literal_position
+ __gtdf2:
+ 	leaf_entry sp, 16
+ 	movi	a6, 0x7ff00000
+@@ -1691,6 +1694,7 @@
+ 	.align	4
+ 	.global	__ledf2
+ 	.type	__ledf2, @function
++	.literal_position
+ __ledf2:
+ 	leaf_entry sp, 16
+ 	movi	a6, 0x7ff00000
+@@ -1753,6 +1757,7 @@
+ 	.align	4
+ 	.global	__gedf2
+ 	.type	__gedf2, @function
++	.literal_position
+ __gedf2:
+ 	leaf_entry sp, 16
+ 	movi	a6, 0x7ff00000
+@@ -1779,6 +1784,7 @@
+ 	.align	4
+ 	.global	__ltdf2
+ 	.type	__ltdf2, @function
++	.literal_position
+ __ltdf2:
+ 	leaf_entry sp, 16
+ 	movi	a6, 0x7ff00000
+@@ -1841,6 +1847,7 @@
+ 	.align	4
+ 	.global	__unorddf2
+ 	.type	__unorddf2, @function
++	.literal_position
+ __unorddf2:
+ 	leaf_entry sp, 16
+ 	movi	a6, 0x7ff00000
+@@ -1923,6 +1930,7 @@
+ 	.align	4
+ 	.global	__fixdfdi
+ 	.type	__fixdfdi, @function
++	.literal_position
+ __fixdfdi:
+ 	leaf_entry sp, 16
+ 
+@@ -2063,6 +2071,7 @@
+ 	.align	4
+ 	.global	__fixunsdfdi
+ 	.type	__fixunsdfdi, @function
++	.literal_position
+ __fixunsdfdi:
+ 	leaf_entry sp, 16
+ 

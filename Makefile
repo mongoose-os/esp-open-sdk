@@ -153,7 +153,7 @@ $(TOOLCHAIN)/xtensa-lx106-elf/sysroot/lib/libhal.a: $(TOOLCHAIN)/bin/xtensa-lx10
 
 _libhal:
 	autoreconf -i
-	PATH="$(TOOLCHAIN)/bin:$(PATH)" ./configure --host=xtensa-lx106-elf --prefix=$(TOOLCHAIN)/xtensa-lx106-elf/sysroot/usr
+	PATH="$(TOOLCHAIN)/bin:$(PATH)" ./configure --host=xtensa-lx106-elf --prefix=$(TOOLCHAIN)/xtensa-lx106-elf/sysroot/usr CFLAGS="-Os -ffunction-sections -fdata-sections -mlongcalls"
 	PATH="$(TOOLCHAIN)/bin:$(PATH)" make
 	PATH="$(TOOLCHAIN)/bin:$(PATH)" make install
 

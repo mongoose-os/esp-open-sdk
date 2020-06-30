@@ -1,5 +1,5 @@
 --- a/libgcc/config/xtensa/ieee754-sf.S	2019-01-01 12:31:55.000000000 +0000
-+++ b/libgcc/config/xtensa/ieee754-sf.S	2020-06-28 03:01:06.904288091 +0100
++++ b/libgcc/config/xtensa/ieee754-sf.S	2020-06-30 14:18:11.064980378 +0100
 @@ -45,6 +45,7 @@
  	.align	4
  	.global	__negsf2
@@ -72,7 +72,15 @@
  __fixsfdi:
  	leaf_entry sp, 16
  
-@@ -1593,6 +1602,7 @@
+@@ -1528,6 +1537,7 @@
+ 	.align	4
+ 	.global	__fixunssfsi
+ 	.type	__fixunssfsi, @function
++	.literal_position
+ __fixunssfsi:
+ 	leaf_entry sp, 16
+ 
+@@ -1593,6 +1603,7 @@
  	.align	4
  	.global	__fixunssfdi
  	.type	__fixunssfdi, @function
@@ -80,8 +88,8 @@
  __fixunssfdi:
  	leaf_entry sp, 16
  
---- a/libgcc/config/xtensa/ieee754-df.S	2019-01-01 12:31:55.000000000 +0000
-+++ b/libgcc/config/xtensa/ieee754-df.S	2020-06-28 03:04:10.282444626 +0100
+--- alibgcc/config/xtensa/ieee754-df.S.orig	2019-01-01 12:31:55.000000000 +0000
++++ b/libgcc/config/xtensa/ieee754-df.S	2020-06-30 15:39:37.068471244 +0100
 @@ -45,6 +45,7 @@
  	.align	4
  	.global	__negdf2
@@ -138,7 +146,15 @@
  __unorddf2:
  	leaf_entry sp, 16
  	movi	a6, 0x7ff00000
-@@ -1923,6 +1930,7 @@
+@@ -1868,6 +1875,7 @@
+ 	.align	4
+ 	.global	__fixdfsi
+ 	.type	__fixdfsi, @function
++	.literal_position
+ __fixdfsi:
+ 	leaf_entry sp, 16
+ 
+@@ -1923,6 +1931,7 @@
  	.align	4
  	.global	__fixdfdi
  	.type	__fixdfdi, @function
@@ -146,11 +162,35 @@
  __fixdfdi:
  	leaf_entry sp, 16
  
-@@ -2063,6 +2071,7 @@
+@@ -1995,6 +2004,7 @@
+ 	.align	4
+ 	.global	__fixunsdfsi
+ 	.type	__fixunsdfsi, @function
++	.literal_position
+ __fixunsdfsi:
+ 	leaf_entry sp, 16
+ 
+@@ -2063,6 +2073,7 @@
  	.align	4
  	.global	__fixunsdfdi
  	.type	__fixunsdfdi, @function
 +	.literal_position
  __fixunsdfdi:
+ 	leaf_entry sp, 16
+ 
+@@ -2294,6 +2305,7 @@
+ 	.align	4
+ 	.global	__truncdfsf2
+ 	.type	__truncdfsf2, @function
++	.literal_position
+ __truncdfsf2:
+ 	leaf_entry sp, 16
+ 
+@@ -2398,6 +2410,7 @@
+ 	.align	4
+ 	.global	__extendsfdf2
+ 	.type	__extendsfdf2, @function
++	.literal_position
+ __extendsfdf2:
  	leaf_entry sp, 16
  

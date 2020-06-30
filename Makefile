@@ -1,3 +1,5 @@
+# Build toolchain if necessary
+BUILD_TOOLCHAIN ?= y
 
 # Whether to merge SDK into Xtensa toolchain, producing standalone
 # ESP8266 toolchain. Use 'n' if you want generic Xtensa toolchain
@@ -26,19 +28,16 @@ CT_EN_GDB ?= yes
 CT_LIBC_EN_IO_EXTRA ?= yes
 
 # Directory to install toolchain to, by default inside current dir.
-TOOLCHAIN = $(TOP)/xtensa-lx106-elf
+TOOLCHAIN = /opt/Espressif/xtensa-lx106-elf
 
 # NOTE: Leave this as-is and use full shas above to simplfiy things.
 # Instead of all the makefile hacks that break every time, just
 # always call it master, then d/l the SDK as a zip based on SHA.
 VENDOR_SDK = master
 
-# NOTE: See full list here:
-# https://github.com/someburner/ESP8266_NONOS_SDK/releases
-REPO_TAG          :=v2.2.2
-VENDOR_FULL_SHA   :=1848ef14625824db977077fef07f92e0992e1840
-VENDOR_GIT_ZIP    :="ESP8266_NONOS_SDK-$(VENDOR_FULL_SHA).zip"
-VENDOR_ZIP_DL_URI :="https://github.com/someburner/ESP8266_NONOS_SDK/releases/download/$(REPO_TAG)/$(VENDOR_GIT_ZIP)"
+VENDOR_FULL_SHA   := 1848ef14625824db977077fef07f92e0992e1840
+VENDOR_GIT_ZIP    := "ESP8266_NONOS_SDK-$(VENDOR_FULL_SHA).zip"
+VENDOR_ZIP_DL_URI := "https://github.com/espressif/ESP8266_NONOS_SDK/archive/$(VENDOR_FULL_SHA).zip"
 
 .PHONY: crosstool-ng esptool toolchain _libhal libs sdk liblwip lwip2 postbuild
 
@@ -78,8 +77,14 @@ $(TOOLCHAIN)/bin/esptool.py:
 
 toolchain: $(TOOLCHAIN)/bin/xtensa-lx106-elf-gcc
 
+ifeq "$(BUILD_TOOLCHAIN)" "y"
 $(TOOLCHAIN)/bin/xtensa-lx106-elf-gcc: crosstool-ng/ct-ng
 	$(MAKE) -C crosstool-ng -f ../Makefile _toolchain
+else
+$(TOOLCHAIN)/bin/xtensa-lx106-elf-gcc:
+	echo No tollchain and not allowed to build
+	exit 1
+endif
 
 _toolchain:
 	# Set GDB, newlib options before loading ct-ng sample
@@ -112,8 +117,8 @@ endif
 	# Append overrides
 	cat ../crosstool-config-overrides >> .config
 	# Patches
-	cp ../*-newlib-*.patch local-patches/newlib/2.0.0
-	cp ../*-libgcc-*.patch local-patches/gcc/$(GCC_VERSION)
+	cp ../9000-newlib-*.patch local-patches/newlib/2.0.0
+	cp ../9000-libgcc-*.patch local-patches/gcc/$(GCC_VERSION)
 	# Build
 	./ct-ng build
 
@@ -220,8 +225,10 @@ distclean: clean
 	-rm -f crosstool-ng/.config.org
 	-rm -rf crosstool-ng/lib
 	-rm -rf crosstool-ng/share
-	-rm -rf crosstool-ng/.build/src
-	-rm -rf $(TOOLCHAIN)
+	rm -rf crosstool-ng/local-patches/*/*/9000-*
+
+fullclean: distclean
+	-rm -rf crosstool-ng/.build
 
 empty_user_rf_pre_init.o: empty_user_rf_pre_init.c $(TOOLCHAIN)/bin/xtensa-lx106-elf-gcc $(VENDOR_SDK_DIR)
 	$(TOOLCHAIN)/bin/xtensa-lx106-elf-gcc -O2 -I$(VENDOR_SDK_DIR)/include -c $<

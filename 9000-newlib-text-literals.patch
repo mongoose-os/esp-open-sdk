@@ -1,0 +1,26 @@
+--- a/newlib/libc/machine/xtensa/strcmp.S.orig	2020-06-30 15:40:43.748776758 +0100
++++ b/newlib/libc/machine/xtensa/strcmp.S	2020-06-30 16:00:03.029795163 +0100
+@@ -26,6 +26,11 @@
+ #define MASK4 0x40404040
+ 
+ 
++	.text
++	.align	4
++	.literal_position
++	.global	strcmp
++	.type	strcmp, @function
+ #if XCHAL_HAVE_L32R
+ 	.literal .Lmask0, MASK0
+ 	.literal .Lmask1, MASK1
+@@ -34,11 +39,6 @@
+ 	.literal .Lmask4, MASK4
+ #endif /* XCHAL_HAVE_L32R */
+ 
+-	.text
+-	.align	4
+-	.literal_position
+-	.global	strcmp
+-	.type	strcmp, @function
+ strcmp:
+ 
+ #if XCHAL_HAVE_L32R && XCHAL_HAVE_LOOPS && XCHAL_HAVE_DENSITY && __XTENSA_EL__ && XCHAL_HAVE_FLIX3

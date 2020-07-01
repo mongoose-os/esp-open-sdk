@@ -1,0 +1,246 @@
+--- lwip2/makefiles/Makefile.lwip2.orig	2020-06-28 00:58:10.829386795 +0100
++++ lwip2/makefiles/Makefile.lwip2	2020-07-01 23:27:32.579506195 +0100
+@@ -3,6 +3,7 @@
+ 
+ OBJ = \
+ 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard netif/ethernet.c)) \
++	$(patsubst %.c,$(BUILD)/%.o,$(wildcard netif/ppp/*.c)) \
+ 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard core/*.c)) \
+ 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard core/ipv4/*.c)) \
+ 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard core/ipv6/*.c)) \
+--- lwip2/makefiles/Makefile.defs.orig	2020-07-01 23:38:50.530131037 +0100
++++ lwip2/makefiles/Makefile.defs	2020-07-02 22:28:34.984880335 +0100
+@@ -22,5 +22,5 @@
+ OD			= $(TOOLS)objdump
+ 
+ BUILD			?= build
+-BUILD_FLAGS += -Wall -Wextra -c -O2 -g -Wpointer-arith -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals -falign-functions=4 -MMD -ffunction-sections -fdata-sections
+-BUILD_DEFINES = -D__ets__ -DICACHE_FLASH -U__STRICT_ANSI__ -DLWIP_OPEN_SRC -DLWIP_BUILD -DUSE_OPTIMIZE_PRINTF -DTARGET=$(target) -D$(DEFINE_TARGET)=1 -DTCP_MSS=$(TCP_MSS) -DLWIP_FEATURES=$(LWIP_FEATURES) -DLWIP_IPV6=$(LWIP_IPV6)
++BUILD_FLAGS += -Wall -Wextra -c -Os -g -Wpointer-arith -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals -falign-functions=4 -MMD -ffunction-sections -fdata-sections
++BUILD_DEFINES = -D__ets__ -DICACHE_FLASH -U__STRICT_ANSI__ -DLWIP_OPEN_SRC -DLWIP_BUILD -DUSE_OPTIMIZE_PRINTF -DTARGET=$(target) -D$(DEFINE_TARGET)=1 -DTCP_MSS=$(TCP_MSS) -DTCP_MSL=5000 -DLWIP_COMPAT_SOCKETS=0 -DLWIP_FEATURES=$(LWIP_FEATURES) -DLWIP_IPV6=$(LWIP_IPV6)
+--- lwip2/glue-esp/lwip-esp.c.orig	2020-07-04 23:59:43.213004849 +0100
++++ lwip2/glue-esp/lwip-esp.c	2020-07-05 00:00:22.276977157 +0100
+@@ -394,7 +394,7 @@
+ 	// annoying message to hide:
+ 	//STUB(espconn_init);
+ #if OPENSDK
+-	esp2glue_espconn_init();
++	// esp2glue_espconn_init();
+ #endif
+ }
+ 
+--- lwip2/makefiles/Makefile.build-lwip2.orig	2020-06-28 00:58:10.829386795 +0100
++++ lwip2/makefiles/Makefile.build-lwip2	2020-07-05 00:19:14.257011642 +0100
+@@ -24,11 +24,7 @@
+ all: $(AUTO) $(LWIP_LIB_RELEASE)
+ 
+ glue-lwip/lwip-err-t.h: $(LWIP_ESP)/arch/cc.h
+-	( \
+-	echo "// script-generated, extracted from espressif SDK's lwIP arch/cc.h"; \
+-	echo "#define LWIP_NO_STDINT_H 1"; \
+-	grep -e LWIP_ERR_T -e ^typedef $< \
+-	) > $@
++	cp ../lwip-err-t.h $@
+ 
+ glue-lwip/lwip-git-hash.h:
+ 	makefiles/make-lwip-hash
+--- lwip2/makefiles/Makefile.glue.orig	2020-06-28 00:40:00.362781569 +0100
++++ lwip2/makefiles/Makefile.glue	2020-07-05 00:49:05.784590737 +0100
+@@ -4,11 +4,11 @@
+ GLUE_LWIP = lwip-git.c
+ GLUE_LWIP += esp-dhcpserver.c
+ GLUE_LWIP += esp-ping.c
+-ifneq ($(target),arduino)
+-GLUE_LWIP += esp-time.c
+-GLUE_LWIP += esp-millis.c
+-endif
+-GLUE_LWIP += espconn.c espconn_buf.c espconn_tcp.c espconn_udp.c
++#ifneq ($(target),arduino)
++#GLUE_LWIP += esp-time.c
++#GLUE_LWIP += esp-millis.c
++#endif
++#GLUE_LWIP += espconn.c espconn_buf.c espconn_tcp.c espconn_udp.c
+ 
+ OBJ = \
+ 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard glue/*.c)) \
+--- lwip2/lwip2-src/src/include/lwip/ip_addr.h.orig	2020-07-05 00:49:20.492693840 +0100
++++ lwip2/lwip2-src/src/include/lwip/ip_addr.h	2020-07-05 01:09:52.245377795 +0100
+@@ -435,4 +435,28 @@
+ }
+ #endif
+ 
++#include "lwip/init.h"
++
++///////////////////////////////////////////////
++#if LWIP_VERSION_MAJOR == 1
++
++#define ipv4_addr ip_addr
++
++///////////////////////////////////////////////
++#else // lwIP-v2
++
++#define ip_addr ip4_addr
++#define ipv4_addr ip4_addr
++#define ipv4_addr_t ip4_addr_t
++
++// defined in lwip-v1.4 sources only, used in fw
++struct ip_info {
++    struct ipv4_addr ip;
++    struct ipv4_addr netmask;
++    struct ipv4_addr gw;
++};
++
++///////////////////////////////////////////////
++#endif // lwIP-v2
++
+ #endif /* LWIP_HDR_IP_ADDR_H */
+--- lwip2/makefiles/patch-non-local-includes.orig	2020-06-28 00:40:00.362781569 +0100
++++ lwip2/makefiles/patch-non-local-includes	2020-07-05 01:07:46.981075600 +0100
+@@ -108,6 +108,7 @@
+ //#include "lwip/ip_addr.h"
+ #include <lwip/ip_addr.h>
+ 
++#if 0
+ ///////////////////////////////////////////////
+ #if LWIP_VERSION_MAJOR == 1
+ 
+@@ -128,6 +129,7 @@
+ 
+ ///////////////////////////////////////////////
+ #endif // lwIP-v2
++#endif
+ 
+ #endif // __IPV4_ADDR_H__
+ EOF
+--- lwip2/glue-lwip/arch/cc.h.orig	2020-07-05 01:16:08.250212444 +0100
++++ lwip2/glue-lwip/arch/cc.h	2020-07-05 01:26:38.119599051 +0100
+@@ -56,7 +56,7 @@
+ #endif
+ #endif // defined(LWIP_BUILD)
+ 
+-#include "mem.h" // useful for os_malloc used in esp-arduino's mDNS
++//#include "mem.h" // useful for os_malloc used in esp-arduino's mDNS
+ 
+ // fixed definitions from esp8266/arduino
+ // renamed with lwip_ to avoid name collisision
+@@ -88,7 +88,7 @@
+ ///////////////////////////////
+ //// MISSING 
+ 
+-#define sys_now millis		// arduino wire millis() definition returns 32 bits like sys_now() does
++//#define sys_now millis		// arduino wire millis() definition returns 32 bits like sys_now() does
+ #define LWIP_RAND r_rand	// old lwip uses this useful undocumented function
+ #define IPSTR "%d.%d.%d.%d"
+ #define IP2STR(ipaddr) ip4_addr1_16(ipaddr), \
+@@ -113,7 +113,8 @@
+ 
+ #define dhcp_cleanup dhcp_cleanup_LWIP2
+ #define dhcp_release dhcp_release_LWIP2
+-#define dhcp_start dhcp_start_LWIP2
++//this conflicts with mos wifi.sta.dhcp_start struct member name.
++//#define dhcp_start dhcp_start_LWIP2
+ #define dhcp_stop dhcp_stop_LWIP2
+ #define dhcps_start dhcps_start_LWIP2
+ //#define dhcps_stop dhcps_stop_LWIP2				// void(void)
+--- lwip2/lwip2-src/src/include/lwip/dhcp.h.orig	2020-06-28 00:40:04.010749840 +0100
++++ lwip2/lwip2-src/src/include/lwip/dhcp.h	2020-07-05 01:33:30.644451108 +0100
+@@ -105,7 +105,7 @@
+ /** Remove a struct dhcp previously set to the netif using dhcp_set_struct() */
+ #define dhcp_remove_struct(netif) netif_set_client_data(netif, LWIP_NETIF_CLIENT_DATA_INDEX_DHCP, NULL)
+ void dhcp_cleanup(struct netif *netif);
+-err_t dhcp_start(struct netif *netif);
++err_t dhcp_start_LWIP2(struct netif *netif);
+ err_t dhcp_renew(struct netif *netif);
+ err_t dhcp_release(struct netif *netif);
+ void dhcp_stop(struct netif *netif);
+--- lwip2/glue-lwip/lwip-git.c.orig	2020-07-05 01:16:08.254212452 +0100
++++ lwip2/glue-lwip/lwip-git.c	2020-07-05 01:35:47.996729226 +0100
+@@ -186,7 +186,7 @@
+ 	// 	returning a const pointer once _set_hostname is called?
+ 	netif_git[netif_idx].hostname = wifi_station_get_hostname();
+ 
+-	err_t err = dhcp_start(&netif_git[netif_idx]);
++	err_t err = dhcp_start_LWIP2(&netif_git[netif_idx]);
+ #if LWIP_IPV6 && LWIP_IPV6_DHCP6_STATELESS
+ 	if (err == ERR_OK)
+ 		err = dhcp6_enable_stateless(&netif_git[netif_idx]);
+@@ -310,11 +310,13 @@
+ 			valid_address |= ip6_addr_isvalid(netif_ip6_addr_state(netif, addrindex));
+ 		}
+ #endif
++#if 0
+ 		if (valid_address)		{
+ 			// restart sntp
+ 			sntp_stop();
+ 			sntp_init();
+ 		}
++#endif
+ 	}
+ }
+ 
+@@ -420,7 +422,7 @@
+ 		netif_git[i].hwaddr_len = NETIF_MAX_HWADDR_LEN;
+ 		memset(netif_git[i].hwaddr, 0, NETIF_MAX_HWADDR_LEN);
+ 	}
+-	
++#if 0
+ 	sntp_servermode_dhcp(1); /* get SNTP server via DHCP */
+ 	sntp_setoperatingmode(SNTP_OPMODE_POLL);
+ 	// start anyway the offline sntp timer
+@@ -429,6 +431,7 @@
+ #else
+ 	sntp_set_system_time(0);
+ #endif
++#endif
+ }
+ 
+ void esp2glue_espconn_init(void)
+--- lwip2/lwip2-src/src/core/ipv4/dhcp.c.orig	2020-07-05 01:40:38.253312028 +0100
++++ lwip2/lwip2-src/src/core/ipv4/dhcp.c	2020-07-05 01:41:09.229373918 +0100
+@@ -441,7 +441,7 @@
+         LWIP_DEBUGF(DHCP_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE, ("dhcp_coarse_tmr(): t0 timeout\n"));
+         /* this clients' lease time has expired */
+         dhcp_release_and_stop(netif);
+-        dhcp_start(netif);
++        dhcp_start_LWIP2(netif);
+         /* timer is active (non zero), and triggers (zeroes) now? */
+       } else if (dhcp->t2_rebind_time && (dhcp->t2_rebind_time-- == 1)) {
+         LWIP_DEBUGF(DHCP_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE, ("dhcp_coarse_tmr(): t2 timeout\n"));
+@@ -513,7 +513,7 @@
+     } else {
+       LWIP_DEBUGF(DHCP_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE, ("dhcp_timeout(): REQUESTING, releasing, restarting\n"));
+       dhcp_release_and_stop(netif);
+-      dhcp_start(netif);
++      dhcp_start_LWIP2(netif);
+     }
+ #if DHCP_DOES_ARP_CHECK
+     /* received no ARP reply for the offered address (which is good) */
+@@ -734,7 +734,7 @@
+  * - ERR_MEM - Out of memory
+  */
+ err_t
+-dhcp_start(struct netif *netif)
++dhcp_start_LWIP2(struct netif *netif)
+ {
+   struct dhcp *dhcp;
+   err_t result;
+--- lwip2/glue-lwip/open/lwipopts.h.orig	2020-06-28 00:58:10.829386795 +0100
++++ lwip2/glue-lwip/open/lwipopts.h	2020-07-05 02:03:12.112229337 +0100
+@@ -993,7 +993,7 @@
+  * LWIP_AUTOIP==1: Enable AUTOIP module.
+  */
+ #if !defined LWIP_AUTOIP || defined __DOXYGEN__
+-#define LWIP_AUTOIP                     LWIP_FEATURES // 0
++#define LWIP_AUTOIP                     0
+ #endif
+ #if !LWIP_IPV4
+ /* disable AUTOIP when IPv4 is disabled */
+@@ -1006,7 +1006,7 @@
+  * the same interface at the same time.
+  */
+ #if !defined LWIP_DHCP_AUTOIP_COOP || defined __DOXYGEN__
+-#define LWIP_DHCP_AUTOIP_COOP           LWIP_FEATURES // 0
++#define LWIP_DHCP_AUTOIP_COOP           0
+ #endif
+ 
+ /**

@@ -193,7 +193,11 @@ else
 	ln -snf $(TOP)/$(VENDOR_SDK_DIR) $(TOP)/sdk
 endif
 
-lwip2:
+lwip2/makefiles/Makefile.defs.orig:
+	patch -p 0 -b < 9000-lwip2.patch
+	cp -v lwip-err-t.h lwip2/glue-lwip/lwip-err-t.h
+
+lwip2: lwip2/makefiles/Makefile.defs.orig
 	$(MAKE) -C lwip2 -f Makefile.open install PREFIX=$(TOOLCHAIN)
 
 lwip2-install:

@@ -1,0 +1,21 @@
+For some reason original Xtensa support patch contains this hack to define {u,}int32_t to be int rather than long.
+This makes no difference in practice as both are 32-bit, but it breaks formatting constants,
+e.g. PRIu32 is still defined to long. This causes -Wformat warnings.
+We revert this bit.
+
+--- a/newlib/libc/include/stdint.h.orig	2020-07-07 22:08:53.179234107 +0100
++++ b/newlib/libc/include/stdint.h	2020-07-07 22:14:21.400054828 +0100
+@@ -76,13 +76,8 @@
+ #endif
+ 
+ #if __have_long32
+-#if TENSILICA || 1
+-typedef signed int int32_t;
+-typedef unsigned int uint32_t;
+-#else
+ typedef signed long int32_t;
+ typedef unsigned long uint32_t;
+-#endif
+ #define __int32_t_defined 1
+ #elif __STDINT_EXP(INT_MAX) == 0x7fffffffL
+ typedef signed int int32_t;

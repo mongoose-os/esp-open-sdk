@@ -117,8 +117,8 @@ endif
 	# Append overrides
 	cat ../crosstool-config-overrides >> .config
 	# Patches
-	cp ../9000-newlib-*.patch local-patches/newlib/2.0.0
-	cp ../9000-libgcc-*.patch local-patches/gcc/$(GCC_VERSION)
+	cp ../9???-newlib-*.patch local-patches/newlib/2.0.0
+	cp ../9???-libgcc-*.patch local-patches/gcc/$(GCC_VERSION)
 	# Build
 	./ct-ng build
 
@@ -229,7 +229,7 @@ distclean: clean
 	-rm -f crosstool-ng/.config.org
 	-rm -rf crosstool-ng/lib
 	-rm -rf crosstool-ng/share
-	rm -rf crosstool-ng/local-patches/*/*/9000-*
+	rm -rf crosstool-ng/local-patches/*/*/9???-*
 
 fullclean: distclean
 	-rm -rf crosstool-ng/.build

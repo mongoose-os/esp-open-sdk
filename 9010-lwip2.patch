@@ -320,3 +320,25 @@ index f7167d4..ae1fde6 100644
  void vPortFree (void *p, const char *, unsigned);
  #endif
  
+--- lwip2/glue-lwip/open/lwipopts.h.orig	2020-07-07 21:33:07.656721604 +0100
++++ lwip2/glue-lwip/open/lwipopts.h	2021-01-17 00:22:24.297180172 +0000
+@@ -3475,7 +3475,7 @@
+  * DHCP_DEBUG: Enable debugging in dhcp.c.
+  */
+ #if !defined DHCP_DEBUG || defined __DOXYGEN__
+-#define DHCP_DEBUG                      LWIP_DBG_OFF
++#define DHCP_DEBUG                      LWIP_DBG_ON
+ #endif
+ 
+ /**
+--- lwip2/glue/gluedebug.h.orig	2020-07-07 21:33:07.656721604 +0100
++++ lwip2/glue/gluedebug.h	2021-01-24 21:27:09.841920698 +0000
+@@ -15,7 +15,7 @@
+ #define UDEBUGINDEX	0	// 0 or 1 (show debug line number)
+ #define UDEBUGSTORE	0	// 0 or 1 (store debug into buffer until doprint_allow=1=serial-available)
+ 
+-#define ULWIPDEBUG	0	// 0 or 1 (trigger lwip debug)
++#define ULWIPDEBUG	1	// 0 or 1 (trigger lwip debug)
+ #define ULWIPASSERT	0	// 0 or 1 (trigger lwip self-check, 0 saves flash)
+ 
+ #if ARDUINO

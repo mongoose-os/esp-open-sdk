@@ -224,9 +224,9 @@
  {
    struct dhcp *dhcp;
    err_t result;
---- lwip2/glue-lwip/open/lwipopts.h.orig	2020-07-07 20:18:32.518092610 +0100
-+++ lwip2/glue-lwip/open/lwipopts.h	2020-07-07 20:40:01.569556171 +0100
-@@ -993,7 +995,7 @@
+--- lwip2/glue-lwip/open/lwipopts.h.orig	2021-01-25 00:20:22.450699485 +0300
++++ lwip2/glue-lwip/open/lwipopts.h	2021-02-20 17:25:35.347604483 +0300
+@@ -993,7 +993,7 @@
   * LWIP_AUTOIP==1: Enable AUTOIP module.
   */
  #if !defined LWIP_AUTOIP || defined __DOXYGEN__
@@ -244,7 +244,16 @@
  #endif
  
  /**
-@@ -3641,4 +3643,8 @@
+@@ -1250,7 +1250,7 @@
+  * will be TCP_WND >> TCP_RCV_SCALE
+  */
+ #if !defined TCP_WND || defined __DOXYGEN__
+-#define TCP_WND                         (4 * TCP_MSS)
++#define TCP_WND                         (2 * TCP_MSS)
+ #endif
+ 
+ /**
+@@ -3641,4 +3641,8 @@
  #define MEMP_NUM_TCP_PCB_TIME_WAIT       2
  #endif
  
@@ -284,7 +293,7 @@
 -	for mss in 536 1460; do \
 -	for feat in 0 1; do \
 +	for v6 in 0; do \
-+	for mss in 536; do \
++	for mss in 1460; do \
 +	for feat in 1; do \
  		test \( $$feat = 0 \) -a \( $$v6 = 1 \) && continue; \
  		featname= ;\

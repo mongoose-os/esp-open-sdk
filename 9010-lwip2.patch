@@ -262,3 +262,21 @@
  #if ARDUINO
  #define STRING_IN_FLASH 1	// *print("fmt is stored in flash")
  #else
+diff --git a/glue/esp-missing.h b/glue/esp-missing.h
+index f7167d4..ae1fde6 100644
+--- lwip2/glue/esp-missing.h
++++ lwip2/glue/esp-missing.h
+@@ -14,11 +14,11 @@ uint32_t r_rand (void);
+ 
+ #if ARDUINO
+ void* pvPortZalloc (size_t, const char*, int);
+-void* pvPortMalloc (size_t xWantedSize, const char* file, int line) __attribute__((malloc, alloc_size(1)));
++void* pvPortMalloc (size_t xWantedSize, const char* file, int line, bool) __attribute__((malloc, alloc_size(1)));
+ void vPortFree (void *ptr, const char* file, int line);
+ #else
+ void *pvPortZalloc (size_t sz, const char *, unsigned);
+-void *pvPortMalloc (size_t sz, const char *, unsigned) __attribute__((malloc, alloc_size(1)));
++void *pvPortMalloc (size_t sz, const char *, unsigned, bool) __attribute__((malloc, alloc_size(1)));
+ void vPortFree (void *p, const char *, unsigned);
+ #endif
+ 

@@ -35,7 +35,7 @@ TOOLCHAIN = /opt/Espressif/xtensa-lx106-elf
 # always call it master, then d/l the SDK as a zip based on SHA.
 VENDOR_SDK = master
 
-VENDOR_FULL_SHA   := a0b131126ba803d0069014698a07e9f2fd3decd6
+VENDOR_FULL_SHA   := 158bb7a53f16cfff21b35fb4ec66fa15261f5a4a
 VENDOR_GIT_ZIP    := "ESP8266_NONOS_SDK-$(VENDOR_FULL_SHA).zip"
 VENDOR_ZIP_DL_URI := "https://github.com/espressif/ESP8266_NONOS_SDK/archive/$(VENDOR_FULL_SHA).zip"
 

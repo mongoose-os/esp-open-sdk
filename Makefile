@@ -259,3 +259,4 @@ ESP8266_NONOS_SDK-master.zip:
 	unzip $(VENDOR_GIT_ZIP)
 	cp -a ESP8266_NONOS_SDK-$(VENDOR_FULL_SHA)/* ESP8266_NONOS_SDK-master/
 	rm -rf ESP8266_NONOS_SDK-$(VENDOR_FULL_SHA)
+	cd ESP8266_NONOS_SDK-master/ && unzip -o ../lib-fix1.zip
